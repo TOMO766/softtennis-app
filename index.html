@@ -2,10 +2,9 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Soft Tennis AI</title>
+<title>ソフトテニス戦術AI</title>
 
 <style>
-
 body{
 margin:0;
 background:#0f172a;
@@ -16,160 +15,140 @@ font-family:sans-serif;
 
 canvas{
 background:#1f7a4c;
+border:2px solid white;
 touch-action:none;
 }
 
 .controls{
 padding:10px;
-background:#1e293b;
 }
 
 .slider{
 width:80%;
 }
-
 </style>
-
 </head>
 
 <body>
 
 <h2>ソフトテニス戦術AI</h2>
 
-<canvas id="court" width="380" height="560"></canvas>
+<canvas id="court" width="360" height="520"></canvas>
 
 <div class="controls">
 
-打球角度  
-<br>
+<p>打球角度</p>
 
 <input type="range" id="angle" min="10" max="70" value="25" class="slider">
 
 <p id="angleText">25°</p>
 
-<p id="prob"></p>
-
 </div>
 
 <script>
 
-const canvas=document.getElementById("court")
-const ctx=canvas.getContext("2d")
+const canvas = document.getElementById("court");
+const ctx = canvas.getContext("2d");
 
-let hitX=190
-let hitY=80
-let angle=25
+let hitX = 180;
+let hitY = 60;
 
-const slider=document.getElementById("angle")
+let angle = 25;
 
-slider.oninput=function(){
+const slider = document.getElementById("angle");
 
-angle=this.value
-document.getElementById("angleText").innerText=angle+"°"
+slider.oninput = function(){
 
-draw()
+angle = this.value;
+document.getElementById("angleText").innerText = angle + "°";
 
-}
+draw();
+
+};
 
 function draw(){
 
-ctx.clearRect(0,0,380,560)
+ctx.clearRect(0,0,360,520);
 
-ctx.strokeStyle="white"
-ctx.lineWidth=2
+ctx.strokeStyle="white";
+ctx.lineWidth=2;
 
-ctx.strokeRect(30,30,320,500)
+// コート
 
-ctx.beginPath()
-ctx.moveTo(190,30)
-ctx.lineTo(190,530)
-ctx.stroke()
+ctx.strokeRect(30,30,300,460);
 
-let rad=angleMath.PI/180
-let length=450
+// センターライン
 
-let leftX=hitX-Math.tan(rad)length
-let rightX=hitX+Math.tan(rad)length
+ctx.beginPath();
+ctx.moveTo(180,30);
+ctx.lineTo(180,490);
+ctx.stroke();
 
-ctx.fillStyle="rgba(255,180,0,0.25)"
+// 打球範囲
 
-ctx.beginPath()
-ctx.moveTo(hitX,hitY)
-ctx.lineTo(leftX,530)
-ctx.lineTo(rightX,530)
-ctx.closePath()
-ctx.fill()
+let rad = angle * Math.PI / 180;
+let length = 400;
 
-let frontX=(hitX+190)/2
-let frontY=280
+let leftX = hitX - Math.tan(rad) * length;
+let rightX = hitX + Math.tan(rad) * length;
 
-ctx.fillStyle="yellow"
+ctx.fillStyle="rgba(255,150,0,0.3)";
 
-ctx.beginPath()
-ctx.arc(frontX,frontY,10,0,Math.PI2)
-ctx.fill()
+ctx.beginPath();
+ctx.moveTo(hitX,hitY);
+ctx.lineTo(leftX,490);
+ctx.lineTo(rightX,490);
+ctx.closePath();
+ctx.fill();
 
-let backX=190+(hitX-190)0.4
-let backY=480
+// 前衛
 
-ctx.fillStyle="cyan"
+let frontX = (hitX + 180) / 2;
+let frontY = 260;
 
-ctx.beginPath()
-ctx.arc(backX,backY,10,0,Math.PI2)
-ctx.fill()
+ctx.fillStyle="yellow";
 
-let enemyFrontX=190-(hitX-190)0.3
-let enemyFrontY=200
+ctx.beginPath();
+ctx.arc(frontX,frontY,10,0,Math.PI2);
+ctx.fill();
 
-ctx.fillStyle="orange"
+// 後衛
 
-ctx.beginPath()
-ctx.arc(enemyFrontX,enemyFrontY,10,0,Math.PI2)
-ctx.fill()
+let backX = 180 + (hitX-180)0.4;
+let backY = 450;
 
-let enemyBackX=hitX
-let enemyBackY=80
+ctx.fillStyle="cyan";
 
-ctx.fillStyle="violet"
+ctx.beginPath();
+ctx.arc(backX,backY,10,0,Math.PI2);
+ctx.fill();
 
-ctx.beginPath()
-ctx.arc(enemyBackX,enemyBackY,10,0,Math.PI2)
-ctx.fill()
+// 打点
 
-ctx.fillStyle="red"
+ctx.fillStyle="red";
 
-ctx.beginPath()
-ctx.arc(hitX,hitY,12,0,Math.PI2)
-ctx.fill()
-
-let diff=(hitX-190)/190
-
-let cross=50+(diff35)
-let straight=40-(diff35)
-let lob=10
-
-document.getElementById("prob").innerHTML=
-
-"クロス "+Math.round(cross)+"% | "+
-"ストレート "+Math.round(straight)+"% | "+
-"ロブ "+lob+"%"
+ctx.beginPath();
+ctx.arc(hitX,hitY,12,0,Math.PI2);
+ctx.fill();
 
 }
 
+// 打点ドラッグ
+
 canvas.addEventListener("touchmove",(e)=>{
 
-let rect=canvas.getBoundingClientRect()
+let rect = canvas.getBoundingClientRect();
 
-hitX=e.touches[0].clientX-rect.left
+hitX = e.touches[0].clientX - rect.left;
 
-if(hitX<40)hitX=40
-if(hitX>340)hitX=340
+if(hitX < 30) hitX = 30;
+if(hitX > 330) hitX = 330;
 
-draw()
+draw();
 
-})
+});
 
-draw()
+draw();
 
 </script>
 
