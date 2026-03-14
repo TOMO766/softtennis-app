@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ソフトテニス戦術AI</title>
+
+<style>
+
+body{
+margin:0;
+background:#0f172a;
+color:white;
+text-align:center;
+font-family:sans-serif;
+}
+
+canvas{
+background:#2e8b57;
+border:3px solid white;
+touch-action:none;
+}
+
+.controls{
+padding:20px;
+}
+
+.slider{
+width:80%;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>ソフトテニス戦術AI</h2>
+
+<canvas id="court" width="360" height="520"></canvas>
+
+<div class="controls">
+
+<p>打球角度</p>
+
+<input type="range" id="angle" min="10" max="60" value="25" class="slider">
+
+<p id="angleText">25°</p>
+
+</div>
+
+<script>
+
+const canvas = document.getElementById("court");
+const ctx = canvas.getContext("2d");
+
+let hitX = 180;
+let hitY = 60;
+let angle = 25;
+
+const slider = document.getElementById("angle");
+
+slider.addEventListener("input", function(){
+
+angle = parseInt(this.value);
+document.getElementById("angleText").innerText = angle + "°";
+
+drawCourt();
+
+});
+
+function drawCourt(){
+
+ctx.clearRect(0,0,360,520);
+
+// コート
+
+ctx.strokeStyle = "white";
+ctx.lineWidth = 2;
+ctx.strokeRect(30,30,300,460);
+
+// センターライン
+
+ctx.beginPath();
+ctx.moveTo(180,30);
+ctx.lineTo(180,490);
+ctx.stroke();
+
+// 打球範囲
+
+let rad = angle * Math.PI / 180;
+let length = 400;
+
+let leftX = hitX - Math.tan(rad) * length;
+let rightX = hitX + Math.tan(rad) * length;
+
+ctx.fillStyle = "rgba(255,150,0,0.3)";
+
+ctx.beginPath();
+ctx.moveTo(hitX,hitY);
+ctx.lineTo(leftX,490);
+ctx.lineTo(rightX,490);
+ctx.closePath();
+ctx.fill();
+
+// 前衛
+
+let frontX = (hitX + 180) / 2;
+let frontY = 260;
+
+ctx.fillStyle = "yellow";
+
+ctx.beginPath();
+ctx.arc(frontX,frontY,10,0,Math.PI2);
+ctx.fill();
+
+// 後衛
+
+let backX = 180 + (hitX-180)0.4;
+let backY = 450;
+
+ctx.fillStyle = "cyan";
+
+ctx.beginPath();
+ctx.arc(backX,backY,10,0,Math.PI2);
+ctx.fill();
+
+// 打点
+
+ctx.fillStyle = "red";
+
+ctx.beginPath();
+ctx.arc(hitX,hitY,12,0,Math.PI2);
+ctx.fill();
+
+}
+
+canvas.addEventListener("touchmove", function(e){
+
+let rect = canvas.getBoundingClientRect();
+
+hitX = e.touches[0].clientX - rect.left;
+
+if(hitX < 30) hitX = 30;
+if(hitX > 330) hitX = 330;
+
+drawCourt();
+
+});
+
+drawCourt();
+
+</script>
+
+</body>
+</html>
