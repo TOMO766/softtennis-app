@@ -77,8 +77,8 @@ ctx.stroke()
 let rad=angle*Math.PI/180
 let length=420
 
-let leftX=hitX-Math.tan(rad)length
-let rightX=hitX+Math.tan(rad)length
+let leftX=hitX-Math.tan(rad)*length
+let rightX=hitX+Math.tan(rad)*length
 
 ctx.fillStyle="rgba(255,150,0,0.35)"
 
@@ -95,7 +95,7 @@ let frontY=260
 ctx.fillStyle="yellow"
 
 ctx.beginPath()
-ctx.arc(frontX,frontY,10,0,Math.PI2)
+ctx.arc(frontX,frontY,10,0,Math.PI*2)
 ctx.fill()
 
 let backX=180+(hitX-180)0.4
@@ -104,13 +104,13 @@ let backY=450
 ctx.fillStyle="cyan"
 
 ctx.beginPath()
-ctx.arc(backX,backY,10,0,Math.PI2)
+ctx.arc(backX,backY,10,0,Math.PI*2)
 ctx.fill()
 
 ctx.fillStyle="red"
 
 ctx.beginPath()
-ctx.arc(hitX,hitY,12,0,Math.PI2)
+ctx.arc(hitX,hitY,12,0,Math.PI*2)
 ctx.fill()
 
 }
