@@ -5,28 +5,28 @@
 <title>ソフトテニス戦術AI</title>
 
 <style>
+
 body{
 margin:0;
-background:#0f172a;
+background:#0b1a33;
 color:white;
 text-align:center;
 font-family:sans-serif;
 }
 
 canvas{
-background:#1f7a4c;
-border:2px solid white;
+background:#2e8b57;
+border:3px solid white;
 touch-action:none;
-}
-
-.controls{
-padding:10px;
+margin-top:10px;
 }
 
 .slider{
 width:80%;
 }
+
 </style>
+
 </head>
 
 <body>
@@ -35,120 +35,101 @@ width:80%;
 
 <canvas id="court" width="360" height="520"></canvas>
 
-<div class="controls">
-
 <p>打球角度</p>
 
-<input type="range" id="angle" min="10" max="70" value="25" class="slider">
+<input type="range" id="angle" min="10" max="60" value="25" class="slider">
 
 <p id="angleText">25°</p>
 
-</div>
-
 <script>
 
-const canvas = document.getElementById("court");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("court")
+const ctx=canvas.getContext("2d")
 
-let hitX = 180;
-let hitY = 60;
+let hitX=180
+let hitY=60
+let angle=25
 
-let angle = 25;
+const slider=document.getElementById("angle")
 
-const slider = document.getElementById("angle");
+slider.addEventListener("input",function(){
 
-slider.oninput = function(){
+angle=parseInt(this.value)
+document.getElementById("angleText").innerText=angle+"°"
 
-angle = this.value;
-document.getElementById("angleText").innerText = angle + "°";
+draw()
 
-draw();
-
-};
+})
 
 function draw(){
 
-ctx.clearRect(0,0,360,520);
+ctx.clearRect(0,0,360,520)
 
-ctx.strokeStyle="white";
-ctx.lineWidth=2;
+ctx.strokeStyle="white"
+ctx.lineWidth=2
 
-// コート
+ctx.strokeRect(30,30,300,460)
 
-ctx.strokeRect(30,30,300,460);
+ctx.beginPath()
+ctx.moveTo(180,30)
+ctx.lineTo(180,490)
+ctx.stroke()
 
-// センターライン
+let rad=angle*Math.PI/180
+let length=420
 
-ctx.beginPath();
-ctx.moveTo(180,30);
-ctx.lineTo(180,490);
-ctx.stroke();
+let leftX=hitX-Math.tan(rad)length
+let rightX=hitX+Math.tan(rad)length
 
-// 打球範囲
+ctx.fillStyle="rgba(255,150,0,0.35)"
 
-let rad = angle * Math.PI / 180;
-let length = 400;
+ctx.beginPath()
+ctx.moveTo(hitX,hitY)
+ctx.lineTo(leftX,490)
+ctx.lineTo(rightX,490)
+ctx.closePath()
+ctx.fill()
 
-let leftX = hitX - Math.tan(rad) * length;
-let rightX = hitX + Math.tan(rad) * length;
+let frontX=(hitX+180)/2
+let frontY=260
 
-ctx.fillStyle="rgba(255,150,0,0.3)";
+ctx.fillStyle="yellow"
 
-ctx.beginPath();
-ctx.moveTo(hitX,hitY);
-ctx.lineTo(leftX,490);
-ctx.lineTo(rightX,490);
-ctx.closePath();
-ctx.fill();
+ctx.beginPath()
+ctx.arc(frontX,frontY,10,0,Math.PI2)
+ctx.fill()
 
-// 前衛
+let backX=180+(hitX-180)0.4
+let backY=450
 
-let frontX = (hitX + 180) / 2;
-let frontY = 260;
+ctx.fillStyle="cyan"
 
-ctx.fillStyle="yellow";
+ctx.beginPath()
+ctx.arc(backX,backY,10,0,Math.PI2)
+ctx.fill()
 
-ctx.beginPath();
-ctx.arc(frontX,frontY,10,0,Math.PI2);
-ctx.fill();
+ctx.fillStyle="red"
 
-// 後衛
-
-let backX = 180 + (hitX-180)0.4;
-let backY = 450;
-
-ctx.fillStyle="cyan";
-
-ctx.beginPath();
-ctx.arc(backX,backY,10,0,Math.PI2);
-ctx.fill();
-
-// 打点
-
-ctx.fillStyle="red";
-
-ctx.beginPath();
-ctx.arc(hitX,hitY,12,0,Math.PI2);
-ctx.fill();
+ctx.beginPath()
+ctx.arc(hitX,hitY,12,0,Math.PI2)
+ctx.fill()
 
 }
 
-// 打点ドラッグ
+canvas.addEventListener("touchmove",function(e){
 
-canvas.addEventListener("touchmove",(e)=>{
+let rect=canvas.getBoundingClientRect()
 
-let rect = canvas.getBoundingClientRect();
+hitX=e.touches[0].clientX-rect.left
 
-hitX = e.touches[0].clientX - rect.left;
+if(hitX<30)hitX=30
+if(hitX>330)hitX=330
 
-if(hitX < 30) hitX = 30;
-if(hitX > 330) hitX = 330;
+draw()
 
-draw();
+})
 
-});
-
-draw();
+draw()
 
 </script>
 
