@@ -29,7 +29,7 @@ width:80%;
 <body>
 
 <h2>ソフトテニス戦術AI</h2>
-<p>赤＝相手後衛　黄＝前衛　青＝味方後衛</p>
+<p>赤＝相手後衛　黄＝前衛　青＝後衛</p>
 
 <canvas id="court" width="360" height="520"></canvas>
 
@@ -43,8 +43,10 @@ const canvas=document.getElementById("court");
 const ctx=canvas.getContext("2d");
 
 let hitX=180;
-let hitY=80; // 初期はベースライン付近
+let hitY=80;
 let angle=25;
+
+const netY = 260;
 
 const slider=document.getElementById("angle");
 
@@ -59,7 +61,7 @@ function draw(){
 ctx.clearRect(0,0,360,520);
 
 // =====================
-// コート（実構造）
+// コート（正確版）
 // =====================
 
 ctx.strokeStyle="white";
@@ -69,32 +71,28 @@ ctx.lineWidth=2;
 ctx.strokeRect(30,30,300,460);
 
 // ネット
-const netY=260;
 ctx.beginPath();
 ctx.moveTo(30,netY);
 ctx.lineTo(330,netY);
 ctx.stroke();
 
-// ベースライン
-const topBase=30;
-const bottomBase=490;
-
 // サービスライン
 const serviceTop=160;
 const serviceBottom=360;
 
-// センターライン（サービス内のみ）
-ctx.beginPath();
-ctx.moveTo(180,serviceTop);
-ctx.lineTo(180,serviceBottom);
-ctx.stroke();
-
-// サービスライン
 ctx.beginPath();
 ctx.moveTo(30,serviceTop);
 ctx.lineTo(330,serviceTop);
 ctx.moveTo(30,serviceBottom);
 ctx.lineTo(330,serviceBottom);
+ctx.stroke();
+
+// センターライン（サービスボックス内のみ）
+ctx.beginPath();
+ctx.moveTo(180,serviceTop);
+ctx.lineTo(180,netY);
+ctx.moveTo(180,netY);
+ctx.lineTo(180,serviceBottom);
 ctx.stroke();
 
 // シングルスライン
@@ -107,7 +105,7 @@ ctx.stroke();
 
 
 // =====================
-// 打球角度（扇）
+// 打球角度（扇形）
 // =====================
 
 let rad=angle*Math.PI/180;
@@ -126,25 +124,24 @@ ctx.fill();
 
 
 // =====================
-// 前衛（リアル調整）
+// 前衛ロジック（修正版）
 // =====================
 
-// ネットとの距離で判断
-let distFromNet = hitY - netY;
+// 基本：ネットより手前に固定
+let frontY = netY + (hitY - netY) * 0.3;
 
-// 前衛位置（重要ロジック）
-let frontY = netY + distFromNet * 0.35;
+// 🔥 絶対にネットを超えない
+if(frontY < netY + 5) frontY = netY + 5;
 
-// 制限
-if(frontY < netY - 30) frontY = netY - 30;
-if(frontY > 360) frontY = 360;
+// 後ろ制限
+if(frontY > 340) frontY = 340;
 
 // 横
 let frontX = 180 + (hitX - 180) * 0.6;
 
 
 // =====================
-// 味方後衛
+// 後衛
 // =====================
 
 let backX = 180 + (hitX - 180) * 0.5;
@@ -167,7 +164,7 @@ ctx.beginPath();
 ctx.arc(backX,backY,10,0,Math.PI*2);
 ctx.fill();
 
-// 打点（相手後衛）
+// 打点
 ctx.fillStyle="red";
 ctx.beginPath();
 ctx.arc(hitX,hitY,12,0,Math.PI*2);
@@ -177,7 +174,7 @@ ctx.fill();
 
 
 // =====================
-// 打点操作（修正版）
+// 打点操作（改善版）
 // =====================
 
 canvas.addEventListener("touchmove",function(e){
@@ -187,13 +184,13 @@ let rect=canvas.getBoundingClientRect();
 hitX=e.touches[0].clientX-rect.left;
 hitY=e.touches[0].clientY-rect.top;
 
-// 横制限（コート幅）
+// 横制限
 if(hitX<30)hitX=30;
 if(hitX>330)hitX=330;
 
-// 縦制限（相手側＋ベースライン外OK）
-if(hitY < 0) hitY = 0;       // ベースライン外OK
-if(hitY > 250) hitY = 250;   // ネットより奥のみ
+// 縦制限（相手コート＋ベースライン外OK）
+if(hitY < 0) hitY = 0;
+if(hitY > netY - 10) hitY = netY - 10;
 
 draw();
 
