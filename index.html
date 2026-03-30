@@ -19,10 +19,6 @@ border:3px solid white;
 touch-action:none;
 margin-top:10px;
 }
-
-.slider{
-width:80%;
-}
 </style>
 </head>
 
@@ -33,66 +29,54 @@ width:80%;
 
 <canvas id="court" width="360" height="520"></canvas>
 
-<p>打球角度</p>
-<input type="range" id="angle" min="10" max="60" value="25" class="slider">
-<p id="angleText">25°</p>
-
 <script>
 
 const canvas=document.getElementById("court");
 const ctx=canvas.getContext("2d");
 
-let hitX=180;
+let hitX=300;
 let hitY=80;
-let angle=25;
 
-const netY = 260;
-
-const slider=document.getElementById("angle");
-
-slider.addEventListener("input",function(){
-angle=parseInt(this.value);
-document.getElementById("angleText").innerText=angle+"°";
-draw();
-});
+const netY=260;
 
 function draw(){
 
 ctx.clearRect(0,0,360,520);
 
 // =====================
-// コート（正確版）
+// コート（見た目改善）
 // =====================
 
 ctx.strokeStyle="white";
 ctx.lineWidth=2;
 
-// 外枠（ダブルス）
+// 外枠
 ctx.strokeRect(30,30,300,460);
 
-// ネット
+// ネット（太く）
+ctx.lineWidth=4;
 ctx.beginPath();
 ctx.moveTo(30,netY);
 ctx.lineTo(330,netY);
 ctx.stroke();
 
+ctx.lineWidth=2;
+
 // サービスライン
-const serviceTop=160;
-const serviceBottom=360;
+const sTop=160;
+const sBottom=360;
 
 ctx.beginPath();
-ctx.moveTo(30,serviceTop);
-ctx.lineTo(330,serviceTop);
-ctx.moveTo(30,serviceBottom);
-ctx.lineTo(330,serviceBottom);
+ctx.moveTo(30,sTop);
+ctx.lineTo(330,sTop);
+ctx.moveTo(30,sBottom);
+ctx.lineTo(330,sBottom);
 ctx.stroke();
 
-// センターライン（サービスボックス内のみ）
+// センターライン
 ctx.beginPath();
-ctx.moveTo(180,serviceTop);
-ctx.lineTo(180,netY);
-ctx.moveTo(180,netY);
-ctx.lineTo(180,serviceBottom);
+ctx.moveTo(180,sTop);
+ctx.lineTo(180,sBottom);
 ctx.stroke();
 
 // シングルスライン
@@ -105,16 +89,27 @@ ctx.stroke();
 
 
 // =====================
-// 打球角度（扇形）
+// 🔥 打球可能範囲（自動）
 // =====================
 
-let rad=angle*Math.PI/180;
-let length=420;
+// 距離によって角度変化
+let dist = netY - hitY;
 
-let leftX=hitX-Math.tan(rad)*length;
-let rightX=hitX+Math.tan(rad)*length;
+// 最大角度
+let baseAngle = 15 + dist * 0.1;
 
-ctx.fillStyle="rgba(255,150,0,0.3)";
+// サイド補正
+let sideOffset = (hitX - 180) / 180;
+baseAngle += Math.abs(sideOffset) * 10;
+
+let rad = baseAngle * Math.PI / 180;
+let length = 500;
+
+let leftX = hitX - Math.tan(rad) * length;
+let rightX = hitX + Math.tan(rad) * length;
+
+// 範囲描画
+ctx.fillStyle="rgba(255,120,80,0.35)";
 ctx.beginPath();
 ctx.moveTo(hitX,hitY);
 ctx.lineTo(leftX,490);
@@ -124,19 +119,14 @@ ctx.fill();
 
 
 // =====================
-// 前衛ロジック（修正版）
+// 前衛（改善）
 // =====================
 
-// 基本：ネットより手前に固定
 let frontY = netY + (hitY - netY) * 0.3;
 
-// 🔥 絶対にネットを超えない
+// ネット越え防止
 if(frontY < netY + 5) frontY = netY + 5;
 
-// 後ろ制限
-if(frontY > 340) frontY = 340;
-
-// 横
 let frontX = 180 + (hitX - 180) * 0.6;
 
 
@@ -152,19 +142,16 @@ let backY = 460;
 // 描画
 // =====================
 
-// 前衛
 ctx.fillStyle="yellow";
 ctx.beginPath();
 ctx.arc(frontX,frontY,10,0,Math.PI*2);
 ctx.fill();
 
-// 後衛
 ctx.fillStyle="cyan";
 ctx.beginPath();
 ctx.arc(backX,backY,10,0,Math.PI*2);
 ctx.fill();
 
-// 打点
 ctx.fillStyle="red";
 ctx.beginPath();
 ctx.arc(hitX,hitY,12,0,Math.PI*2);
@@ -174,7 +161,7 @@ ctx.fill();
 
 
 // =====================
-// 打点操作（改善版）
+// 打点操作
 // =====================
 
 canvas.addEventListener("touchmove",function(e){
@@ -188,9 +175,9 @@ hitY=e.touches[0].clientY-rect.top;
 if(hitX<30)hitX=30;
 if(hitX>330)hitX=330;
 
-// 縦制限（相手コート＋ベースライン外OK）
-if(hitY < 0) hitY = 0;
-if(hitY > netY - 10) hitY = netY - 10;
+// 縦（相手側＋外OK）
+if(hitY<0)hitY=0;
+if(hitY>netY-10)hitY=netY-10;
 
 draw();
 
