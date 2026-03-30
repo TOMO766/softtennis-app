@@ -51,27 +51,34 @@ let angle=25;
 const slider=document.getElementById("angle");
 
 slider.addEventListener("input",function(){
-
 angle=parseInt(this.value);
 document.getElementById("angleText").innerText=angle+"°";
 draw();
-
 });
 
 function draw(){
 
 ctx.clearRect(0,0,360,520);
 
+// --- コート ---
 ctx.strokeStyle="white";
 ctx.lineWidth=2;
-
 ctx.strokeRect(30,30,300,460);
 
+// センターライン
 ctx.beginPath();
 ctx.moveTo(180,30);
 ctx.lineTo(180,490);
 ctx.stroke();
 
+// サービスライン（追加）
+const serviceY=260;
+ctx.beginPath();
+ctx.moveTo(30,serviceY);
+ctx.lineTo(330,serviceY);
+ctx.stroke();
+
+// --- 打球範囲 ---
 let rad=angle*Math.PI/180;
 let length=420;
 
@@ -79,7 +86,6 @@ let leftX=hitX-Math.tan(rad)*length;
 let rightX=hitX+Math.tan(rad)*length;
 
 ctx.fillStyle="rgba(255,150,0,0.35)";
-
 ctx.beginPath();
 ctx.moveTo(hitX,hitY);
 ctx.lineTo(leftX,490);
@@ -87,32 +93,47 @@ ctx.lineTo(rightX,490);
 ctx.closePath();
 ctx.fill();
 
-let frontX=(hitX+180)/2;
-let frontY=260;
+// =====================
+// 🔥 前衛ロジック（ここ重要）
+// =====================
 
+// 縦：サービスライン基準で上下
+let frontY = serviceY + (hitY - 60) * 0.6;
+
+// 制限（前に行きすぎない）
+if(frontY < 120) frontY = 120;
+if(frontY > 340) frontY = 340;
+
+// 横：センター基準で寄る
+let frontX = 180 + (hitX - 180) * 0.5;
+
+// 前衛描画
 ctx.fillStyle="yellow";
-
 ctx.beginPath();
 ctx.arc(frontX,frontY,10,0,Math.PI*2);
 ctx.fill();
 
-let backX=180+(hitX-180)*0.4;
-let backY=450;
+// =====================
+// 後衛（今まで通り少し整理）
+// =====================
+
+let backX = 180 + (hitX - 180) * 0.4;
+let backY = 450;
 
 ctx.fillStyle="cyan";
-
 ctx.beginPath();
 ctx.arc(backX,backY,10,0,Math.PI*2);
 ctx.fill();
 
+// 打点
 ctx.fillStyle="red";
-
 ctx.beginPath();
 ctx.arc(hitX,hitY,12,0,Math.PI*2);
 ctx.fill();
 
 }
 
+// 横スライド（打点）
 canvas.addEventListener("touchmove",function(e){
 
 let rect=canvas.getBoundingClientRect();
