@@ -19,48 +19,30 @@ border:3px solid white;
 touch-action:none;
 margin-top:10px;
 }
-
-.slider{
-width:80%;
-}
 </style>
-
 </head>
 
 <body>
 
 <h2>ソフトテニス戦術AI</h2>
+<p>赤点＝相手後衛　黄＝前衛（自動）　青＝後衛</p>
 
 <canvas id="court" width="360" height="520"></canvas>
-
-<p>打球角度</p>
-
-<input type="range" id="angle" min="10" max="60" value="25" class="slider">
-
-<p id="angleText">25°</p>
 
 <script>
 
 const canvas=document.getElementById("court");
 const ctx=canvas.getContext("2d");
 
+// 打点（自由移動）
 let hitX=180;
-let hitY=60;
-let angle=25;
-
-const slider=document.getElementById("angle");
-
-slider.addEventListener("input",function(){
-angle=parseInt(this.value);
-document.getElementById("angleText").innerText=angle+"°";
-draw();
-});
+let hitY=100;
 
 function draw(){
 
 ctx.clearRect(0,0,360,520);
 
-// --- コート ---
+// --- コート枠 ---
 ctx.strokeStyle="white";
 ctx.lineWidth=2;
 ctx.strokeRect(30,30,300,460);
@@ -71,55 +53,69 @@ ctx.moveTo(180,30);
 ctx.lineTo(180,490);
 ctx.stroke();
 
-// サービスライン（追加）
+// サービスライン
 const serviceY=260;
 ctx.beginPath();
 ctx.moveTo(30,serviceY);
 ctx.lineTo(330,serviceY);
 ctx.stroke();
 
-// --- 打球範囲 ---
-let rad=angle*Math.PI/180;
-let length=420;
-
-let leftX=hitX-Math.tan(rad)*length;
-let rightX=hitX+Math.tan(rad)*length;
-
-ctx.fillStyle="rgba(255,150,0,0.35)";
+// サービスエンドライン（中央横線）
+const midY=160;
 ctx.beginPath();
-ctx.moveTo(hitX,hitY);
-ctx.lineTo(leftX,490);
-ctx.lineTo(rightX,490);
-ctx.closePath();
-ctx.fill();
+ctx.moveTo(30,midY);
+ctx.lineTo(330,midY);
+ctx.stroke();
+
+// サービスサイドライン（シングルスライン）
+ctx.beginPath();
+ctx.moveTo(90,30);
+ctx.lineTo(90,490);
+ctx.moveTo(270,30);
+ctx.lineTo(270,490);
+ctx.stroke();
+
 
 // =====================
-// 🔥 前衛ロジック（ここ重要）
+// 🔥 前衛ロジック
 // =====================
 
-// 縦：サービスライン基準で上下
-let frontY = serviceY + (hitY - 60) * 0.6;
+// 縦：打点に応じてサービスライン基準で調整
+let frontY = serviceY + (hitY - 100) * 0.6;
 
-// 制限（前に行きすぎない）
+// 制限
 if(frontY < 120) frontY = 120;
 if(frontY > 340) frontY = 340;
 
 // 横：センター基準で寄る
 let frontX = 180 + (hitX - 180) * 0.5;
 
-// 前衛描画
+
+// =====================
+// 🔵 後衛ロジック
+// =====================
+
+let backX = 180 + (hitX - 180) * 0.7;
+let backY = 460;
+
+
+// =====================
+// 描画
+// =====================
+
+// 打点範囲（参考）
+ctx.fillStyle="rgba(255,150,0,0.25)";
+ctx.beginPath();
+ctx.arc(hitX,hitY,20,0,Math.PI*2);
+ctx.fill();
+
+// 前衛
 ctx.fillStyle="yellow";
 ctx.beginPath();
 ctx.arc(frontX,frontY,10,0,Math.PI*2);
 ctx.fill();
 
-// =====================
-// 後衛（今まで通り少し整理）
-// =====================
-
-let backX = 180 + (hitX - 180) * 0.4;
-let backY = 450;
-
+// 後衛
 ctx.fillStyle="cyan";
 ctx.beginPath();
 ctx.arc(backX,backY,10,0,Math.PI*2);
@@ -133,15 +129,19 @@ ctx.fill();
 
 }
 
-// 横スライド（打点）
+// 🔴 打点を自由に動かす（縦横対応）
 canvas.addEventListener("touchmove",function(e){
 
 let rect=canvas.getBoundingClientRect();
 
 hitX=e.touches[0].clientX-rect.left;
+hitY=e.touches[0].clientY-rect.top;
 
+// 範囲制限
 if(hitX<30)hitX=30;
 if(hitX>330)hitX=330;
+if(hitY<30)hitY=30;
+if(hitY>490)hitY=490;
 
 draw();
 
